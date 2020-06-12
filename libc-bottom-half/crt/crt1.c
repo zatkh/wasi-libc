@@ -1,8 +1,8 @@
 #include <wasi/api.h>
+#include <stdlib.h>
 extern void __wasm_call_ctors(void);
 extern int __original_main(void);
 extern void __wasm_call_dtors(void);
-_Noreturn void exit(int);
 
 __attribute__((export_name("_start")))
 void _start(void) {
