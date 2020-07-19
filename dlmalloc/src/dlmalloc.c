@@ -65,6 +65,8 @@ static size_t dlmalloc_usable_size(void*);
 // Export the public names.
 
 void *malloc(size_t size) {
+    //_exit(1);//for debug
+    //return NULL;
     return dlmalloc(size);
 }
 
