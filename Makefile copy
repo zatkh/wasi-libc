@@ -9,17 +9,18 @@ SYSROOT ?= $(CURDIR)/sysroot
 # A directory to install to for "make install".
 INSTALL_DIR ?= /usr/local
 # single or posix
-THREAD_MODEL ?= vwasm
+THREAD_MODEL ?= single
 # yes or no
-BUILD_DLMALLOC ?= yes
+BUILD_DLMALLOC ?= no
+USE_SNMALLOC ?= yes
 BUILD_LIBC_TOP_HALF ?= yes
 # The directory where we're store intermediate artifacts.
 OBJDIR ?= $(CURDIR)/build
 
 # Check dependencies.
-ifneq ($(BUILD_DLMALLOC),yes)
-$(error build currently depends on BUILD_DLMALLOC=yes)
-endif
+#ifneq ($(BUILD_DLMALLOC),yes)
+#$(error build currently depends on BUILD_DLMALLOC=yes)
+#endif
 
 # Variables from this point on are not meant to be overridable via the
 # make command-line.
@@ -31,6 +32,7 @@ MULTIARCH_TRIPLE = wasm32-wasi
 
 # These variables describe the locations of various files and directories in
 # the source tree.
+SNMALLOC_DIR = $(CURDIR)/snmalloc
 DLMALLOC_DIR = $(CURDIR)/dlmalloc
 DLMALLOC_SRC_DIR = $(DLMALLOC_DIR)/src
 DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/dlmalloc.c
@@ -182,8 +184,6 @@ WASM_CFLAGS += --target=$(TARGET_TRIPLE)
 WASM_CFLAGS += -fno-trapping-math
 
 # Configure support for threads.
-ifeq ($(THREAD_MODEL), vwasm)
-endif
 ifeq ($(THREAD_MODEL), single)
 WASM_CFLAGS += -mthread-model single
 endif
@@ -193,6 +193,11 @@ endif
 
 # Set the sysroot.
 WASM_CFLAGS += --sysroot="$(SYSROOT)"
+
+ifeq ($(USE_SNMALLOC),yes)
+WASM_CFLAGS += -I$(SNMALLOC_DIR)/src
+WASM_LFLAGS = -L$(SNMALLOC_DIR)/build -lsnmallocshim-static
+endif
 
 # These variables describe the locations of various files and directories in
 # the build tree.
@@ -305,10 +310,6 @@ ifeq ($(THREAD_MODEL), single)
 # Remove headers not supported in single-threaded mode.
 MUSL_OMIT_HEADERS += "aio.h" "pthread.h"
 endif
-ifeq ($(THREAD_MODEL), vwasm)
-
-MUSL_OMIT_HEADERS += "aio.h"
-endif
 
 default: finish
 
@@ -354,7 +355,7 @@ $(OBJDIR)/%.no-floating-point.o: $(CURDIR)/%.c include_dirs
 
 $(OBJDIR)/%.o: $(CURDIR)/%.c include_dirs
 	@mkdir -p "$(@D)"
-	"$(WASM_CC)" $(WASM_CFLAGS) -MD -MP -o $@ -c $<
+	"$(WASM_CC)" $(WASM_CFLAGS) -MD -MP -o $@ $(WASM_LFLAGS) -c $<
 
 -include $(shell find $(OBJDIR) -name \*.d)
 

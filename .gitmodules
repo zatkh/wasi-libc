@@ -4,3 +4,6 @@
 [submodule "snmalloc"]
 	path = snmalloc
 	url = git@github.com:zatkh/snmalloc.git
+[submodule "wasi-libc-test"]
+	path = wasi-libc-test
+	url = https://github.com/CraneStation/wasi-libc-test.git
