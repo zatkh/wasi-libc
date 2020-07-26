@@ -5,9 +5,11 @@
 #include <stddef.h>
 
 #include <__typedef_sa_family_t.h>
+#include <__typedef_max_align_t.h>
 
 struct sockaddr_un {
     _Alignas(max_align_t) sa_family_t sun_family;
+    char sun_path[108];
 };
 
 #endif

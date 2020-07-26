@@ -1,4 +1,5 @@
-#ifdef _REENTRANT
+#ifdef __vwasm
+#elif defined(_REENTRANT)
 #error "multiple threads not supported in musl yet"
 #endif
 

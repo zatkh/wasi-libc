@@ -17,15 +17,15 @@ struct map {
     int flags;
     off_t offset;
     size_t length;
+    char body[];
 };
 
 void *mmap(void *addr, size_t length, int prot, int flags,
            int fd, off_t offset) {
     // Check for unsupported flags.
-    if ((flags & (MAP_PRIVATE | MAP_SHARED)) == 0 ||
-        (flags & MAP_FIXED) != 0 ||
+    if ((flags & MAP_FIXED) != 0 ||
 #ifdef MAP_SHARED_VALIDATE
-        (flags & MAP_SHARED_VALIDATE) == MAP_SHARED_VALIDATE ||
+        (flags & MAP_SHARED_VALIDATE) != 0 ||
 #endif
 #ifdef MAP_NORESERVE
         (flags & MAP_NORESERVE) != 0 ||
@@ -84,9 +84,8 @@ void *mmap(void *addr, size_t length, int prot, int flags,
 
     // Initialize the main memory buffer, either with the contents of a file,
     // or with zeros.
-    addr = map + 1;
     if ((flags & MAP_ANON) == 0) {
-        char *body = (char *)addr;
+        char *body = map->body;
         while (length > 0) {
             const ssize_t nread = pread(fd, body, length, offset);
             if (nread < 0) {
@@ -101,10 +100,10 @@ void *mmap(void *addr, size_t length, int prot, int flags,
             body += (size_t)nread;
         }
     } else {
-        memset(addr, 0, length);
+        memset(map->body, 0, length);
     }
 
-    return addr;
+    return map->body;
 }
 
 int munmap(void *addr, size_t length) {

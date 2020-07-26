@@ -25,14 +25,14 @@ WASM_LDFLAGS="-Xlinker --stack-first -Xlinker --no-check-features"
 
 # Note potential performance gains from unimplemented-simd128 here.
 # May not be necessary in future.
-WASM_CFLAGS_NO_QUOTES=-O3 --sysroot=$WASM_SYSROOT -msimd128 -munimplemented-simd128 -mno-atomics -D__faasm
+WASM_CFLAGS_NO_QUOTES=-O3 --sysroot=$WASM_SYSROOT -msimd128 -munimplemented-simd128 -mno-atomics -D__vwasm
  WASM_CXXFLAGS_NO_QUOTES=$WASM_CFLAGS_NO_QUOTES
  WASM_CFLAGS=$WASM_CFLAGS_NO_QUOTES
  WASM_CXXFLAGS=$WASM_CXXFLAGS_NO_QUOTES
 
-$WASM_CC --target=wasm32-wasi -O3 --sysroot $WASM_SYSROOT -msimd128 -munimplemented-simd128 -mno-atomics -D__faasm -o test.wasm test.c
+$WASM_CC --target=wasm32-wasi -O3 --sysroot $WASM_SYSROOT -msimd128 -munimplemented-simd128 -mno-atomics -D__vwasm -o test.wasm test.c
 
-$WASM_CXX --target=wasm32-wasi -O3 --sysroot $WASM_SYSROOT -msimd128 -munimplemented-simd128 -mno-atomics -D__faasm -o test-cpp.wasm test.cpp
+$WASM_CXX --target=wasm32-wasi -O3 --sysroot $WASM_SYSROOT -msimd128 -munimplemented-simd128 -mno-atomics -D__vwasm -o test-cpp.wasm test.cpp
   
 $IWASM_DIR/iwasm test.wasm  
 $IWASM_DIR/iwasm test-cpp.wasm 

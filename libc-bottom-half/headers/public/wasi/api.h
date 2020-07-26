@@ -658,9 +658,9 @@ _Static_assert(sizeof(__wasi_rights_t) == 8, "witx calculated size");
 _Static_assert(_Alignof(__wasi_rights_t) == 8, "witx calculated align");
 
 /**
- * A file descriptor handle.
+ * A file descriptor index.
  */
-typedef int __wasi_fd_t;
+typedef uint32_t __wasi_fd_t;
 
 _Static_assert(sizeof(__wasi_fd_t) == 4, "witx calculated size");
 _Static_assert(_Alignof(__wasi_fd_t) == 4, "witx calculated align");
@@ -1219,7 +1219,7 @@ _Static_assert(sizeof(__wasi_subclockflags_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_subclockflags_t) == 2, "witx calculated align");
 
 /**
- * The contents of a `subscription` when type is `eventtype::clock`.
+ * The contents of a $subscription when type is `eventtype::clock`.
  */
 typedef struct __wasi_subscription_clock_t {
     /**
@@ -1253,7 +1253,7 @@ _Static_assert(offsetof(__wasi_subscription_clock_t, precision) == 16, "witx cal
 _Static_assert(offsetof(__wasi_subscription_clock_t, flags) == 24, "witx calculated offset");
 
 /**
- * The contents of a `subscription` when type is type is
+ * The contents of a $subscription when type is type is
  * `eventtype::fd_read` or `eventtype::fd_write`.
  */
 typedef struct __wasi_subscription_fd_readwrite_t {
@@ -1269,7 +1269,7 @@ _Static_assert(_Alignof(__wasi_subscription_fd_readwrite_t) == 4, "witx calculat
 _Static_assert(offsetof(__wasi_subscription_fd_readwrite_t, file_descriptor) == 0, "witx calculated offset");
 
 /**
- * The contents of a `subscription`.
+ * The contents of a $subscription.
  */
 typedef union __wasi_subscription_u_u_t {
     __wasi_subscription_clock_t clock;
@@ -1526,6 +1526,13 @@ typedef uint16_t __wasi_riflags_t;
  */
 #define __WASI_RIFLAGS_RECV_WAITALL (UINT16_C(2))
 
+#ifdef __vwasm
+/**
+ * This is referenced in header_sys_socket and seems to be missing
+ */
+#define __WASI_RIFLAGS_RECV_DATA_TRUNCATED (UINT16_C(3))
+#endif
+
 _Static_assert(sizeof(__wasi_riflags_t) == 2, "witx calculated size");
 _Static_assert(_Alignof(__wasi_riflags_t) == 2, "witx calculated align");
 
@@ -1666,17 +1673,17 @@ __wasi_errno_t __wasi_environ_get(
 ));
 
 /**
- * Return environment variable data sizes.
+ * Return command-line argument data sizes.
  */
 __wasi_errno_t __wasi_environ_sizes_get(
     /**
-     * The number of environment variable arguments.
+     * The number of arguments.
      */
-    __wasi_size_t *environc,
+    __wasi_size_t *argc,
     /**
-     * The size of the environment variable data.
+     * The size of the argument string data.
      */
-    __wasi_size_t *environ_buf_size
+    __wasi_size_t *argv_buf_size
 ) __attribute__((
     __import_module__("wasi_snapshot_preview1"),
     __import_name__("environ_sizes_get"),

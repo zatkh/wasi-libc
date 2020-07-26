@@ -1,5 +1,3 @@
-#ifndef _WASI_EMULATED_SIGNAL
-#else
 #ifndef _SIGNAL_H
 #define _SIGNAL_H
 
@@ -16,6 +14,7 @@ extern "C" {
 #ifdef __wasilibc_unmodified_upstream /* WASI has no ucontext support */
 #ifdef _GNU_SOURCE
 #define __ucontext ucontext
+#endif
 #endif
 
 #define __NEED_size_t
@@ -45,7 +44,6 @@ extern "C" {
 #define SI_KERNEL 128
 
 typedef struct sigaltstack stack_t;
-#endif
 
 #endif
 
@@ -55,7 +53,6 @@ typedef struct sigaltstack stack_t;
  || defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) \
  || defined(_BSD_SOURCE)
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no sigaction */
 #define SIG_HOLD ((void (*)(int)) 2)
 
 #define FPE_INTDIV 1
@@ -193,7 +190,6 @@ struct sigevent {
 #define SIGEV_SIGNAL 0
 #define SIGEV_NONE 1
 #define SIGEV_THREAD 2
-#endif
 
 #ifdef __wasilibc_unmodified_upstream /* WASI has no realtime signals */
 int __libc_current_sigrtmin(void);
@@ -203,7 +199,7 @@ int __libc_current_sigrtmax(void);
 #define SIGRTMAX  (__libc_current_sigrtmax())
 #endif
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no signals */
+#if defined(__vwasm) || defined(__wasilibc_unmodified_upstream) /* WASI has no signals */
 int kill(pid_t, int);
 
 int sigemptyset(sigset_t *);
@@ -222,15 +218,13 @@ int sigtimedwait(const sigset_t *__restrict, siginfo_t *__restrict, const struct
 int sigqueue(pid_t, int, union sigval);
 #endif
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no threads yet */
 int pthread_sigmask(int, const sigset_t *__restrict, sigset_t *__restrict);
 int pthread_kill(pthread_t, int);
-#endif
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no siginfo */
+#ifdef __wasilibc_unmodified_upstream /* WASI has no signals */
 void psiginfo(const siginfo_t *, const char *);
-#endif
 void psignal(int, const char *);
+#endif
 
 #endif
 
@@ -262,6 +256,7 @@ void (*sigset(int, void (*)(int)))(int);
 #endif
 #endif
 
+#if defined(__vwasm) || defined(__wasilibc_unmodified_upstream) /* WASI has no signals */
 #if defined(_BSD_SOURCE) || defined(_GNU_SOURCE)
 #define NSIG _NSIG
 typedef void (*sig_t)(int);
@@ -270,7 +265,6 @@ typedef void (*sig_t)(int);
 #ifdef _GNU_SOURCE
 typedef void (*sighandler_t)(int);
 void (*bsd_signal(int, void (*)(int)))(int);
-#ifdef __wasilibc_unmodified_upstream /* WASI has no signal sets */
 int sigisemptyset(const sigset_t *);
 int sigorset (sigset_t *, const sigset_t *, const sigset_t *);
 int sigandset(sigset_t *, const sigset_t *, const sigset_t *);
@@ -278,30 +272,19 @@ int sigandset(sigset_t *, const sigset_t *, const sigset_t *);
 #define SA_NOMASK SA_NODEFER
 #define SA_ONESHOT SA_RESETHAND
 #endif
-#endif
 
-#ifdef __wasilibc_unmodified_upstream /* 1 is a valid function pointer on wasm */
 #define SIG_ERR  ((void (*)(int))-1)
 #define SIG_DFL  ((void (*)(int)) 0)
 #define SIG_IGN  ((void (*)(int)) 1)
-#else
-void __SIG_ERR(int);
-void __SIG_IGN(int);
-#define SIG_ERR  (__SIG_ERR)
-#define SIG_DFL  ((void (*)(int)) 0)
-#define SIG_IGN  (__SIG_IGN)
 #endif
 
-#ifdef __wasilibc_unmodified_upstream /* Make sig_atomic_t 64-bit on wasm64 */
 typedef int sig_atomic_t;
-#else
-typedef long sig_atomic_t;
-#endif
 
+#if defined(__vwasm) || defined(__wasilibc_unmodified_upstream) /* WASI has no signals */
 void (*signal(int, void (*)(int)))(int);
+#endif
 int raise(int);
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no sigtimedwait */
 #if _REDIR_TIME64
 #if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE) \
  || defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) \
@@ -309,11 +292,9 @@ int raise(int);
 __REDIR(sigtimedwait, __sigtimedwait_time64);
 #endif
 #endif
-#endif
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
 #endif

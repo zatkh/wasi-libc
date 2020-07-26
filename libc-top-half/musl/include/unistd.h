@@ -41,13 +41,13 @@ extern "C" {
 
 #include <bits/alltypes.h>
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no pipe */
+#if defined(__vwasm) || defined(__wasilibc_unmodified_upstream) /* WASI has no pipe */
 int pipe(int [2]);
 int pipe2(int [2], int);
 #endif
 int close(int);
 int posix_close(int, int);
-#ifdef __wasilibc_unmodified_upstream /* WASI has no dup */
+#if defined(__vwasm) || defined(__wasilibc_unmodified_upstream) /* WASI has no dup */
 int dup(int);
 int dup2(int, int);
 int dup3(int, int, int);
@@ -118,7 +118,7 @@ int ftruncate(int, off_t);
 int access(const char *, int);
 int faccessat(int, const char *, int, int);
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no cwd */
+#if defined(__vwasm) || defined(__wasilibc_unmodified_upstream) /* WASI has no cwd */
 int chdir(const char *);
 int fchdir(int);
 char *getcwd(char *, size_t);
@@ -128,11 +128,9 @@ char *getcwd(char *, size_t);
 unsigned alarm(unsigned);
 #endif
 unsigned sleep(unsigned);
-#ifdef __wasilibc_unmodified_upstream /* WASI has no pause */
 int pause(void);
-#endif
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no fork/exec */
+#if defined(__vwasm) || defined(__wasilibc_unmodified_upstream) /* WASI has no fork/exec */
 pid_t fork(void);
 int execve(const char *, char *const [], char *const []);
 int execv(const char *, char *const []);
@@ -144,7 +142,7 @@ int fexecve(int, char *const [], char *const []);
 #endif
 _Noreturn void _exit(int);
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no getpid etc. */
+#if defined(__vwasm) || defined(__wasilibc_unmodified_upstream) /* WASI has no getpid etc. */
 pid_t getpid(void);
 pid_t getppid(void);
 pid_t getpgrp(void);
@@ -153,7 +151,7 @@ int setpgid(pid_t, pid_t);
 pid_t setsid(void);
 pid_t getsid(pid_t);
 #endif
-#ifdef __wasilibc_unmodified_upstream /* WASI has no ttyname */
+#if defined(__vwasm) || defined(__wasilibc_unmodified_upstream) /* WASI has no ttyname */
 char *ttyname(int);
 int ttyname_r(int, char *, size_t);
 #endif
@@ -163,11 +161,12 @@ pid_t tcgetpgrp(int);
 int tcsetpgrp(int, pid_t);
 #endif
 
-#ifdef __wasilibc_unmodified_upstream /* WASI has no getuid etc. */
 uid_t getuid(void);
 uid_t geteuid(void);
 gid_t getgid(void);
 gid_t getegid(void);
+
+#ifdef __wasilibc_unmodified_upstream /* WASI has no getuid etc. */
 int getgroups(int, gid_t []);
 int setuid(uid_t);
 int seteuid(uid_t);
@@ -222,15 +221,16 @@ unsigned ualarm(unsigned, unsigned);
 #define L_SET 0
 #define L_INCR 1
 #define L_XTND 2
-#ifdef __wasilibc_unmodified_upstream /* WASI has no brk */
+#if defined(__vwasm) || defined(__wasilibc_unmodified_upstream) /* WASI has no brk */
 int brk(void *);
 #endif
 void *sbrk(intptr_t);
+
+int getpagesize(void);
 #ifdef __wasilibc_unmodified_upstream /* WASI has no processes */
 pid_t vfork(void);
 int vhangup(void);
 int chroot(const char *);
-int getpagesize(void);
 int getdtablesize(void);
 int sethostname(const char *, size_t);
 int getdomainname(char *, size_t);
@@ -242,17 +242,17 @@ void setusershell(void);
 void endusershell(void);
 char *getusershell(void);
 int acct(const char *);
-long syscall(long, ...);
 int execvpe(const char *, char *const [], char *const []);
 int issetugid(void);
 #endif
+long syscall(long, ...);
 int getentropy(void *, size_t);
 extern int optreset;
 #endif
 
 #ifdef _GNU_SOURCE
 extern char **environ;
-#ifdef __wasilibc_unmodified_upstream /* WASI has no get/setresuid */
+#if defined(__vwasm) || defined(__wasilibc_unmodified_upstream) /* WASI has no get/setresuid */
 int setresuid(uid_t, uid_t, uid_t);
 int setresgid(gid_t, gid_t, gid_t);
 int getresuid(uid_t *, uid_t *, uid_t *);

@@ -2,7 +2,8 @@
 #include <errno.h>
 #include <unistd.h>
 
-#ifdef _REENTRANT
+#ifdef __vwasm
+#elif defined(_REENTRANT)
 #error With threads support, getentropy is not intended to be a cancellation point.
 #endif
 

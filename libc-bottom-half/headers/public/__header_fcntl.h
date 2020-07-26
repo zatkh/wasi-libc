@@ -4,6 +4,7 @@
 #include <wasi/api.h>
 #include <__seek.h>
 #include <__mode_t.h>
+#include <__typedef_off_t.h>
 
 #define O_APPEND __WASI_FDFLAGS_APPEND
 #define O_DSYNC __WASI_FDFLAGS_DSYNC
@@ -44,6 +45,7 @@
 #define POSIX_FADV_SEQUENTIAL __WASI_ADVICE_SEQUENTIAL
 #define POSIX_FADV_WILLNEED __WASI_ADVICE_WILLNEED
 
+#define F_DUPFD (0)
 #define F_GETFD (1)
 #define F_SETFD (2)
 #define F_GETFL (3)
@@ -55,5 +57,9 @@
 #define AT_SYMLINK_NOFOLLOW (0x1)
 #define AT_SYMLINK_FOLLOW   (0x2)
 #define AT_REMOVEDIR        (0x4)
+
+#ifdef __vwasm
+int lockf(int, int, off_t);
+#endif
 
 #endif
