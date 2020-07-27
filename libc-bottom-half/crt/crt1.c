@@ -1,7 +1,7 @@
 #include <wasi/api.h>
 extern void __wasm_call_ctors(void);
 extern int __original_main(void);
-extern void __prepare_for_exit(void);
+extern void __wasm_call_dtors(void);
 
 void _start(void) {
     // The linker synthesizes this to call constructors.
@@ -14,7 +14,7 @@ void _start(void) {
     int r = __original_main();
 
     // Call atexit functions, destructors, stdio cleanup, etc.
-    __prepare_for_exit();
+    __wasm_call_dtors();
 
     // If main exited successfully, just return, otherwise call
     // `__wasi_proc_exit`.
