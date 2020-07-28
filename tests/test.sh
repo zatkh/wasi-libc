@@ -31,7 +31,7 @@ WASM_CFLAGS_NO_QUOTES=-O3 --sysroot=$WASM_SYSROOT -msimd128 -munimplemented-simd
  WASM_CFLAGS=$WASM_CFLAGS_NO_QUOTES
  WASM_CXXFLAGS=$WASM_CXXFLAGS_NO_QUOTES
 
-$WASM_CC --target=wasm32-wasi -O3 --sysroot $WASM_SYSROOT -msimd128 -munimplemented-simd128 -mno-atomics -D__vwasm -o test.wasm test.c $SNMALLOC -lstdc++
+$WASM_CC --target=wasm32-wasi -O3 --sysroot $WASM_SYSROOT -msimd128 -munimplemented-simd128 -mno-atomics -D__vwasm -o test.wasm test.c $SNMALLOC
 
 #$WASM_CXX --target=wasm32-wasi -O3 --sysroot $WASM_SYSROOT -msimd128 -munimplemented-simd128 -mno-atomics -D__vwasm -o test-cpp.wasm test.cpp
   
