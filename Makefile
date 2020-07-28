@@ -9,9 +9,10 @@ SYSROOT ?= $(CURDIR)/sysroot
 # A directory to install to for "make install".
 INSTALL_DIR ?= /usr/local
 # single or posix
-THREAD_MODEL ?= single
+THREAD_MODEL ?= vwasm
 # yes or no
-BUILD_DLMALLOC ?= yes
+BUILD_DLMALLOC ?= no
+BUILD_SNMALLOC ?= yes
 BUILD_LIBC_BOTTOM_HALF ?= yes
 BUILD_LIBC_TOP_HALF ?= yes
 # The directory where we're store intermediate artifacts.
@@ -24,8 +25,8 @@ $(error BUILD_LIBC_TOP_HALF=yes depends on BUILD_LIBC_BOTTOM_HALF=yes)
 endif
 endif
 ifeq ($(BUILD_LIBC_BOTTOM_HALF),yes)
-ifneq ($(BUILD_DLMALLOC),yes)
-$(error BUILD_LIBC_BOTTOM_HALF=yes depends on BUILD_DLMALLOC=yes)
+ifneq ($(BUILD_SNMALLOC),yes)
+ #$(error BUILD_LIBC_BOTTOM_HALF=yes depends on BUILD_SNMALLOC=yes)
 endif
 endif
 
@@ -45,6 +46,7 @@ BASICS_CRT_SOURCES = $(wildcard $(BASICS_DIR)/crt/*.c)
 BASICS_SOURCES = \
     $(wildcard $(BASICS_DIR)/sources/*.c) \
     $(wildcard $(BASICS_DIR)/sources/math/*.c)
+SNMALLOC_DIR = $(CURDIR)/snmalloc
 DLMALLOC_DIR = $(CURDIR)/dlmalloc
 DLMALLOC_SRC_DIR = $(DLMALLOC_DIR)/src
 DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/dlmalloc.c
@@ -212,6 +214,8 @@ DLMALLOC_OBJS = $(call objs,$(DLMALLOC_SOURCES))
 LIBC_BOTTOM_HALF_ALL_OBJS = $(call objs,$(LIBC_BOTTOM_HALF_ALL_SOURCES))
 LIBC_TOP_HALF_ALL_OBJS = $(call objs,$(LIBC_TOP_HALF_ALL_SOURCES))
 LIBC_OBJS := $(BASICS_OBJS)
+
+
 ifeq ($(BUILD_DLMALLOC),yes)
 LIBC_OBJS += $(DLMALLOC_OBJS)
 endif
@@ -331,13 +335,16 @@ endif
 
 default: finish
 
-$(SYSROOT_LIB)/libc.a: $(LIBC_OBJS)
+$(SYSROOT_LIB)/libc.a: $(LIBC_OBJS) $(SYSROOT_LIB)/libsnmallocshim-static.a
 
 $(SYSROOT_LIB)/libc-printscan-long-double.a: $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS)
 
 $(SYSROOT_LIB)/libc-printscan-no-floating-point.a: $(MUSL_PRINTSCAN_NO_FLOATING_POINT_OBJS)
 
 $(SYSROOT_LIB)/libwasi-emulated-mman.a: $(LIBWASI_EMULATED_MMAN_OBJS)
+
+$(SYSROOT_LIB)/libsnmallocshim-static.a: 
+        cp -r "$(SNMALLOC_DIR)/build/lib*" "$(SYSROOT_LIB)"
 
 %.a:
 	@mkdir -p "$(@D)"
@@ -374,6 +381,9 @@ $(OBJDIR)/%.o: $(CURDIR)/%.c include_dirs
 
 $(DLMALLOC_OBJS): WASM_CFLAGS += \
     -I$(DLMALLOC_INC)
+
+
+
 
 startup_files $(LIBC_BOTTOM_HALF_ALL_OBJS): WASM_CFLAGS += \
     -I$(LIBC_BOTTOM_HALF_HEADERS_PRIVATE) \
@@ -444,9 +454,12 @@ startup_files: include_dirs
 libc: include_dirs \
     $(SYSROOT_LIB)/libc.a \
     $(SYSROOT_LIB)/libc-printscan-long-double.a \
-    $(SYSROOT_LIB)/libc-printscan-no-floating-point.a 
+    $(SYSROOT_LIB)/libc-printscan-no-floating-point.a \
+    $(SYSROOT_LIB)/libsnmallocshim-static.a
+
 #    $(SYSROOT_LIB)/libwasi-emulated-mman.a
 
+#$(SNMALLOC_DIR)/build/libsnmallocshim-static.a
 finish: startup_files libc
 	#
 	# Create empty placeholder libraries.
@@ -469,7 +482,7 @@ finish_checks:
 	@# LLVM PR40497, which is fixed in 9.0, but not in 8.0.
 	@# Ignore certain llvm builtin symbols such as those starting with __mul
 	@# since these dependencies can vary between llvm versions.
-	"$(WASM_NM)" --defined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/*.o \
+	"$(WASM_NM)" --defined-only "$(SYSROOT_LIB)"/libc.a "$(SYSROOT_LIB)"/*.o  \
 	    |grep ' [[:upper:]] ' |sed 's/.* [[:upper:]] //' |LC_ALL=C sort > "$(SYSROOT_SHARE)/defined-symbols.txt"
 	for undef_sym in $$("$(WASM_NM)" --undefined-only "$(SYSROOT_LIB)"/*.a "$(SYSROOT_LIB)"/*.o \
 	    |grep ' U ' |sed 's/.* U //' |LC_ALL=C sort |uniq); do \
