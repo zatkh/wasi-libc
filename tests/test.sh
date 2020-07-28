@@ -17,7 +17,7 @@ WASM_NM=$WASM_TOOLCHAIN_BIN/llvm.nm
 WASM_RANLIB=$WASM_TOOLCHAIN_BIN/llvm-ranlib
 WASM_LD=$WASM_TOOLCHAIN_BIN/wasm-ld
 WASM_LDSHARED=$WASM_TOOLCHAIN_BIN/wasm-ld
-SNMALLOC=../snmalloc/libsnmallocshim-static.a
+SNMALLOC=../snmalloc/build/libsnmallocshim-static.a
 WASM_LDFLAGS="-Xlinker --stack-first -Xlinker --no-check-features"
 
  WASM_BUILD=wasm32
