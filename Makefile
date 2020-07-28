@@ -1,13 +1,13 @@
 # These variables are specifically meant to be overridable via the make
 # command-line.
-WASM_CC ?= clang
+WASM_CC ?= /usr/local/vwasm/toolchain/bin/clang
 WASM_NM ?= $(patsubst %clang,%llvm-nm,$(WASM_CC))
 WASM_AR ?= $(patsubst %clang,%llvm-ar,$(WASM_CC))
 WASM_CFLAGS ?= -O2 -DNDEBUG
 # The directory where we build the sysroot.
 SYSROOT ?= $(CURDIR)/sysroot
 # A directory to install to for "make install".
-INSTALL_DIR ?= /usr/local
+INSTALL_DIR ?= /usr/local/vwasm/llvm-sysroot/
 # single or posix
 THREAD_MODEL ?= vwasm
 # yes or no
@@ -48,8 +48,10 @@ BASICS_SOURCES = \
     $(wildcard $(BASICS_DIR)/sources/math/*.c)
 SNMALLOC_DIR = $(CURDIR)/snmalloc
 DLMALLOC_DIR = $(CURDIR)/dlmalloc
+SNMALLOC_DIR = $(CURDIR)/snmalloc/
+SNMALLOC_INC = $(SNMALLOC_DIR)/src/
 DLMALLOC_SRC_DIR = $(DLMALLOC_DIR)/src
-DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/dlmalloc.c
+DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/malloc.c
 DLMALLOC_INC = $(DLMALLOC_DIR)/include
 LIBC_BOTTOM_HALF_DIR = $(CURDIR)/libc-bottom-half
 LIBC_BOTTOM_HALF_CLOUDLIBC_SRC = $(LIBC_BOTTOM_HALF_DIR)/cloudlibc/src
@@ -343,8 +345,6 @@ $(SYSROOT_LIB)/libc-printscan-no-floating-point.a: $(MUSL_PRINTSCAN_NO_FLOATING_
 
 $(SYSROOT_LIB)/libwasi-emulated-mman.a: $(LIBWASI_EMULATED_MMAN_OBJS)
 
-$(SYSROOT_LIB)/libsnmallocshim-static.a: 
-        cp -r "$(SNMALLOC_DIR)/build/lib*" "$(SYSROOT_LIB)"
 
 %.a:
 	@mkdir -p "$(@D)"
@@ -380,7 +380,7 @@ $(OBJDIR)/%.o: $(CURDIR)/%.c include_dirs
 -include $(shell find $(OBJDIR) -name \*.d)
 
 $(DLMALLOC_OBJS): WASM_CFLAGS += \
-    -I$(DLMALLOC_INC)
+    -I$(DLMALLOC_INC) -I$(SNMALLOC_INC)
 
 
 

@@ -6,7 +6,7 @@ IWASM_DIR=/home/zt/Documents/git/verona-mc/verona/src/rt/external/wamr/product-m
 # PATH=$WASI_DIR/bin:$PATH
 
 
-WASM_SYSROOT=/usr/local/vwasm/llvm-sysroot
+WASM_SYSROOT=/usr/local/vwasm/llvm-sysroot/
 WASM_TOOLCHAIN_BIN=/usr/local/vwasm/toolchain/bin
 
 WASM_CC=$WASM_TOOLCHAIN_BIN/clang
@@ -17,6 +17,7 @@ WASM_NM=$WASM_TOOLCHAIN_BIN/llvm-nm
 WASM_RANLIB=$WASM_TOOLCHAIN_BIN/llvm-ranlib
 WASM_LD=$WASM_TOOLCHAIN_BIN/wasm-ld
 WASM_LDSHARED=$WASM_TOOLCHAIN_BIN/wasm-ld
+SNMALLOC=../snmalloc/build/libsnmallocshim-static.a
 WASM_LDFLAGS="-Xlinker --stack-first -Xlinker --no-check-features"
 
  WASM_BUILD=wasm32
@@ -30,9 +31,9 @@ WASM_CFLAGS_NO_QUOTES=-O3 --sysroot=$WASM_SYSROOT -msimd128 -munimplemented-simd
  WASM_CFLAGS=$WASM_CFLAGS_NO_QUOTES
  WASM_CXXFLAGS=$WASM_CXXFLAGS_NO_QUOTES
 
-$WASM_CC -v --target=wasm32-wasi -O3 --sysroot $WASM_SYSROOT -msimd128 -munimplemented-simd128 -mno-atomics -D__vwasm -o test.wasm test.c
+$WASM_CC --target=wasm32-wasi -O3 --sysroot $WASM_SYSROOT -msimd128 -munimplemented-simd128 -mno-atomics -D__vwasm -o test.wasm test.c $SNMALLOC
 
-$WASM_CXX -v --target=wasm32-wasi -O3 --sysroot $WASM_SYSROOT -msimd128 -munimplemented-simd128 -mno-atomics -D__vwasm -o test-cpp.wasm test.cpp
+#$WASM_CXX --target=wasm32-wasi -O3 --sysroot $WASM_SYSROOT -msimd128 -munimplemented-simd128 -mno-atomics -D__vwasm -o test-cpp.wasm test.cpp
   
 $IWASM_DIR/iwasm test.wasm  
-$IWASM_DIR/iwasm test-cpp.wasm 
+#IWASM_DIR/iwasm test-cpp.wasm 
