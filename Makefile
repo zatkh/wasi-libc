@@ -1,13 +1,13 @@
 # These variables are specifically meant to be overridable via the make
 # command-line.
-WASM_CC ?= clang
+WASM_CC ?= /usr/local/vwasm/toolchain/bin/clang
 WASM_NM ?= $(patsubst %clang,%llvm-nm,$(WASM_CC))
 WASM_AR ?= $(patsubst %clang,%llvm-ar,$(WASM_CC))
 WASM_CFLAGS ?= -O2 -DNDEBUG
 # The directory where we build the sysroot.
 SYSROOT ?= $(CURDIR)/sysroot
 # A directory to install to for "make install".
-INSTALL_DIR ?= /usr/local
+INSTALL_DIR ?= /usr/local/vwasm/llvm-sysroot/
 # single or posix
 THREAD_MODEL ?= single
 # yes or no
@@ -49,7 +49,7 @@ DLMALLOC_DIR = $(CURDIR)/dlmalloc
 SNMALLOC_DIR = $(CURDIR)/snmalloc/
 SNMALLOC_INC = $(SNMALLOC_DIR)/src/
 DLMALLOC_SRC_DIR = $(DLMALLOC_DIR)/src
-DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/malloc.cc
+DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/malloc.c
 DLMALLOC_INC = $(DLMALLOC_DIR)/include
 LIBC_BOTTOM_HALF_DIR = $(CURDIR)/libc-bottom-half
 LIBC_BOTTOM_HALF_CLOUDLIBC_SRC = $(LIBC_BOTTOM_HALF_DIR)/cloudlibc/src
@@ -333,7 +333,7 @@ endif
 
 default: finish
 
-$(SYSROOT_LIB)/libc.a: $(LIBC_OBJS) $(SNMALLOC_DIR)/src/libcsnmallocshim-static.a
+$(SYSROOT_LIB)/libc.a: $(LIBC_OBJS)
 
 $(SYSROOT_LIB)/libc-printscan-long-double.a: $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS)
 
