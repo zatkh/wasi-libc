@@ -46,8 +46,10 @@ BASICS_SOURCES = \
     $(wildcard $(BASICS_DIR)/sources/*.c) \
     $(wildcard $(BASICS_DIR)/sources/math/*.c)
 DLMALLOC_DIR = $(CURDIR)/dlmalloc
+SNMALLOC_DIR = $(CURDIR)/snmalloc/
+SNMALLOC_INC = $(SNMALLOC_DIR)/src/
 DLMALLOC_SRC_DIR = $(DLMALLOC_DIR)/src
-DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/dlmalloc.c
+DLMALLOC_SOURCES = $(DLMALLOC_SRC_DIR)/malloc.cc
 DLMALLOC_INC = $(DLMALLOC_DIR)/include
 LIBC_BOTTOM_HALF_DIR = $(CURDIR)/libc-bottom-half
 LIBC_BOTTOM_HALF_CLOUDLIBC_SRC = $(LIBC_BOTTOM_HALF_DIR)/cloudlibc/src
@@ -331,7 +333,7 @@ endif
 
 default: finish
 
-$(SYSROOT_LIB)/libc.a: $(LIBC_OBJS)
+$(SYSROOT_LIB)/libc.a: $(LIBC_OBJS) $(SNMALLOC_DIR)/src/libcsnmallocshim-static.a
 
 $(SYSROOT_LIB)/libc-printscan-long-double.a: $(MUSL_PRINTSCAN_LONG_DOUBLE_OBJS)
 
@@ -373,7 +375,7 @@ $(OBJDIR)/%.o: $(CURDIR)/%.c include_dirs
 -include $(shell find $(OBJDIR) -name \*.d)
 
 $(DLMALLOC_OBJS): WASM_CFLAGS += \
-    -I$(DLMALLOC_INC)
+    -I$(DLMALLOC_INC) -I$(SNMALLOC_INC)
 
 startup_files $(LIBC_BOTTOM_HALF_ALL_OBJS): WASM_CFLAGS += \
     -I$(LIBC_BOTTOM_HALF_HEADERS_PRIVATE) \
